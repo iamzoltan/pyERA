@@ -13,8 +13,10 @@ def main():
     # Load the data from different modalities
     motor_data = np.loadtxt("./data/joint_positions.txt")
     # Convert motor data from radians to degrees
-    motor_data_degrees = motor_data.copy() * 180 / np.pi
+    # motor_data_degrees = motor_data.copy() * 180 / np.pi
     motor_input_size = motor_data[0].shape[0]
+    normalized_motor_data = (motor_data - np.min(motor_data)) / \
+        (np.max(motor_data) - np.min(motor_data))
     tot_epoch = motor_data.shape[0]
     # your images in an array
     sensory_data = loadImages("./data/pepper_images/")
@@ -49,7 +51,7 @@ def main():
     train_triplets = []
     test_triplets = []
     for epoch in range(1, tot_epoch):
-        m_t_coord = motor_som.return_BMU_index(motor_data_degrees[epoch])
+        m_t_coord = motor_som.return_BMU_index(normalized_motor_data[epoch])
         s_t_coord = sensory_som.return_BMU_index(
             sensory_data[epoch-1].flatten())
         s_t1_coord = sensory_som.return_BMU_index(
@@ -106,6 +108,7 @@ def main():
     print("Saving the network in: " + str(file_name))
     mmr_som.save(path=output_path, name="som_mmr")
     np.save(output_path + "test_triplets", test_triplets)
+    np.save(output_path + "train_triplets", train_triplets)
 
 
 # TODO: make mmr som, look into 3d som, look into cosine
